@@ -1,0 +1,10 @@
+{
+    "extends": "./base.tsconfig.json",
+    "compilerOptions": {
+        "rootDir": "./source",
+        "types": [
+            "node",
+            "@cocos/creator-types/editor"
+        ]
+    }
+}

@@ -1,0 +1,14 @@
+{
+    "package_version": 2,
+    "name": "",
+    "author": "",
+    "editor": "",
+    "description": "",
+    "main": "./main.js",
+    "panels": {},
+    "contributions": {
+        "menu": [],
+        "messages": {},
+        "shortcuts": []
+    }
+}
