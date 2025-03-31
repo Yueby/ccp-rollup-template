@@ -1,9 +1,5 @@
-import logger from './utils/logger';
-
-const packageName = 'ccp-rollup-template';
-
-// 设置日志包名
-logger.setPackageName(packageName);
+import { packageName } from './utils/config';
+import { logger } from './utils/logger';
 
 /**
  * @en Registration method for the main process of Extension
@@ -11,12 +7,12 @@ logger.setPackageName(packageName);
  */
 export const methods: { [key: string]: (...any: any) => any } = {
     /**
-     * @en Example of a method that can be called from the panel
-     * @zh 可以从面板调用的方法示例
+     * @en A method that can be triggered by message
+     * @zh 通过 message 触发的方法
      */
-    async exampleMethod(text: string) {
-        logger.info(`收到消息: ${text}`);
-        return 'success';
+    openPanel() {
+        logger.info(`正在打开面板: ${packageName}`);
+        Editor.Panel.open(packageName);
     },
 };
 

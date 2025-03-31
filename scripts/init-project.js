@@ -33,167 +33,50 @@ async function initProject() {
 
     // 获取用户输入
     const name = await prompt(`项目名称 (${defaultName}): `);
-    const title = await prompt(`显示名称 (${name || defaultName}): `);
     const description = await prompt('项目描述: ');
-    const version = await prompt('版本 (1.0.0): ');
-    const author = await prompt('作者: ');
-    const minEditorVersion = await prompt('最低支持的编辑器版本 (3.3.0): ');
-    const cocosExtensionPath = await prompt(
-        'Cocos Creator 扩展目录路径 (可选，留空稍后在 .env 文件中配置): '
-    );
 
     // 使用默认值或用户输入
     const projectName = name || defaultName;
-    const projectTitle = title || projectName;
-    const projectVersion = version || '1.0.0';
     const projectDescription = description;
-    const projectAuthor = author;
-    const editorVersion = minEditorVersion || '3.3.0';
 
-    // 更新 package.json
+    // 1. 更新 package.json
     const packageJsonPath = path.join(rootDir, 'package.json');
-    const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8'));
+    let packageJsonContent = fs.readFileSync(packageJsonPath, 'utf8');
+    
+    packageJsonContent = packageJsonContent.replace(/ccp-rollup-template/g, projectName);
+    fs.writeFileSync(packageJsonPath, packageJsonContent);
+    console.log('- 已更新 package.json');
 
-    packageJson.name = projectName;
-    packageJson.title = projectTitle;
-    packageJson.version = projectVersion;
-    packageJson.description = `i18n:${projectName}.description`;
-    packageJson.author = projectAuthor;
-    packageJson.editor = `>=${editorVersion}`;
-    packageJson.main = `dist/${projectName}/main.js`;
-
-    fs.writeFileSync(packageJsonPath, JSON.stringify(packageJson, null, 4));
-
-    // 更新 assets/package.json
+    // 2. 更新 assets/package.json
     const assetsPackageJsonPath = path.join(rootDir, 'assets', 'package.json');
-    const assetsPackageJson = JSON.parse(fs.readFileSync(assetsPackageJsonPath, 'utf8'));
+    let assetsPackageJsonContent = fs.readFileSync(assetsPackageJsonPath, 'utf8');
+    assetsPackageJsonContent = assetsPackageJsonContent.replace(/ccp-rollup-template/g, projectName);
+    fs.writeFileSync(assetsPackageJsonPath, assetsPackageJsonContent);
+    console.log('- 已更新 assets/package.json');
 
-    assetsPackageJson.name = projectName;
-    assetsPackageJson.author = projectAuthor;
-    assetsPackageJson.editor = `>=${editorVersion}`;
-    assetsPackageJson.description = `i18n:${projectName}.description`;
-
-    fs.writeFileSync(assetsPackageJsonPath, JSON.stringify(assetsPackageJson, null, 4));
-
-    // 更新 i18n 文件
+    // 3. 更新 i18n/zh.js
     const zhPath = path.join(rootDir, 'i18n', 'zh.js');
-    const enPath = path.join(rootDir, 'i18n', 'en.js');
-
-    const zhContent = `"use strict";
-module.exports = {
-    title: "${projectTitle}",
-    description: "${projectDescription || '一个基于rollup的Cocos Creator扩展'}",
-};`;
-
-    const enContent = `"use strict";
-module.exports = {
-    title: "${projectTitle}",
-    description: "${projectDescription || 'A Cocos Creator extension based on rollup'}",
-};`;
-
+    let zhContent = fs.readFileSync(zhPath, 'utf8');
+    // 更新title和description
+    zhContent = zhContent
+        .replace(/title: "[^"]+"/g, `title: "${projectName}"`)
+        .replace(/description: "[^"]+"/g, `description: "${projectDescription || '一个基于rollup的Cocos Creator扩展'}"`);
     fs.writeFileSync(zhPath, zhContent);
+    console.log('- 已更新 i18n/zh.js');
+
+    // 4. 更新 i18n/en.js
+    const enPath = path.join(rootDir, 'i18n', 'en.js');
+    let enContent = fs.readFileSync(enPath, 'utf8');
+    // 更新title和description
+    enContent = enContent
+        .replace(/title: "[^"]+"/g, `title: "${projectName}"`)
+        .replace(/description: "[^"]+"/g, `description: "${projectDescription || 'A Cocos Creator extension based on rollup'}"`);
     fs.writeFileSync(enPath, enContent);
-
-    // 更新 README 文件
-    const readmePath = path.join(rootDir, 'assets', 'README.md');
-    const readmeCNPath = path.join(rootDir, 'assets', 'README_CN.md');
-
-    const readmeContent = `# ${projectTitle}
-
-${projectDescription || 'A Cocos Creator extension based on rollup'}
-
-## Features
-
-- Feature 1
-- Feature 2
-
-## Installation
-
-1. Download the extension package
-2. Import it into Cocos Creator
-
-## Usage
-
-...
-
-## License
-
-...
-
-`;
-
-    const readmeCNContent = `# ${projectTitle}
-
-${projectDescription || '一个基于rollup的Cocos Creator扩展'}
-
-## 功能特性
-
-- 功能1
-- 功能2
-
-## 安装方法
-
-1. 下载扩展包
-2. 导入到Cocos Creator中
-
-## 使用方法
-
-...
-
-## 许可证
-
-...
-
-`;
-
-    fs.writeFileSync(readmePath, readmeContent);
-    fs.writeFileSync(readmeCNPath, readmeCNContent);
-
-    // 更新 source/main.ts 中的包名
-    const mainTsPath = path.join(rootDir, 'source', 'main.ts');
-    let mainTsContent = fs.readFileSync(mainTsPath, 'utf8');
-
-    // 替换packageName变量，虽然构建时会自动替换，但在开发时直接看到正确的值更好
-    mainTsContent = mainTsContent.replace(
-        /const packageName = ['"][^'"]*['"];/,
-        `const packageName = '${projectName}';`
-    );
-    fs.writeFileSync(mainTsPath, mainTsContent);
-
-    // 更新 .env 文件
-    const envPath = path.join(rootDir, '.env');
-    const envContent = `# Cocos Creator 扩展部署路径
-# 修改为您的 Cocos Creator 扩展目录路径
-COCOS_EXTENSION_PATH=${cocosExtensionPath || '/path/to/your/CocosCreator/extensions'}
-
-# 构建模式 (development 或 production)
-BUILD_MODE=development
-
-# 是否在构建后自动部署到扩展目录
-AUTO_DEPLOY=true
-`;
-
-    fs.writeFileSync(envPath, envContent);
+    console.log('- 已更新 i18n/en.js');
 
     console.log('\n项目初始化完成！');
-    console.log('已更新以下文件:');
-    console.log('- package.json');
-    console.log('- assets/package.json');
-    console.log('- i18n/zh.js');
-    console.log('- i18n/en.js');
-    console.log('- assets/README.md');
-    console.log('- assets/README_CN.md');
-    console.log('- source/main.ts');
-    console.log('- .env');
-
     console.log('\n现在您可以运行以下命令构建项目:');
     console.log('pnpm build');
-
-    if (!cocosExtensionPath) {
-        console.log(
-            '\n注意: 您需要在 .env 文件中配置 Cocos Creator 扩展目录路径以启用自动部署功能。'
-        );
-    }
 
     rl.close();
 }

@@ -1,7 +1,8 @@
 import { app, shell } from 'electron';
 import fs from 'fs';
 import path from 'path';
-import logger from './logger';
+import { i18n, version } from './config';
+import { logger } from './logger';
 
 // 更新检查路径
 const updateCheckPath = String.raw``;
@@ -116,12 +117,13 @@ export async function checkUpdate() {
         }
 
         const remoteVersion = JSON.parse(fs.readFileSync(remotePkgPath, 'utf-8')).version;
-        const localVersion = JSON.parse(fs.readFileSync(localPkgPath, 'utf-8')).version;
+        // 使用config.ts中的版本号
+        const localVersion = version;
 
         // 比较版本号 - 仅当远程版本大于本地版本时才提示更新
         if (compareVersions(remoteVersion, localVersion) > 0) {
             // 显示更新提示
-            const title = Editor.I18n.t('hierarchy-extension.title');
+            const title = Editor.I18n.t(i18n('title'));
             const result = await Editor.Dialog.info(title, {
                 detail: `发现新版本 ${remoteVersion}，当前版本 ${localVersion}。\n点击"更新"自动更新，点击"手动更新"打开更新文件夹。`,
                 buttons: ['取消', '更新', '手动更新'],

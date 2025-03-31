@@ -6,6 +6,7 @@ import terser from '@rollup/plugin-terser';
 import typescript from '@rollup/plugin-typescript';
 import * as dotenv from 'dotenv';
 import fs from 'fs-extra';
+import { glob } from 'glob';
 import { builtinModules } from 'module';
 import { dirname, join } from 'path';
 import copy from 'rollup-plugin-copy';
@@ -53,19 +54,57 @@ function deployExtension(options) {
 }
 
 // 变量替换工具
-function replaceVariables(appName) {
+function replaceVariables(appName, version) {
     return {
         name: 'replace-variables',
-        transform(code) {
-            return {
-                code: code.replace(
-                    /const packageName = ['"][^'"]*['"];/,
-                    `const packageName = '${appName}';`
-                ),
-                map: null,
-            };
-        },
+        // 直接在源文件处理阶段替换config.ts内容
+        transform(code, id) {
+            // 检查是否是config.ts文件
+            if (id.includes('config.ts') || id.includes('config.js')) {
+
+                // 替换packageName
+                let newCode = code.replace(
+                    /export\s+const\s+packageName\s*=\s*["'].*?["']/g,
+                    `export const packageName = "${appName}"`
+                );
+
+                // 替换version
+                newCode = newCode.replace(
+                    /export\s+const\s+version\s*=\s*["'].*?["']/g,
+                    `export const version = "${version}"`
+                );
+
+                return newCode;
+            }
+            return null;
+        }
     };
+}
+
+// 自动获取入口点
+function getEntryPoints() {
+    // 基本入口点
+    const baseEntries = {
+        main: 'source/main.ts',
+    };
+
+    // 扫描panels目录
+    const panelFiles = glob.sync('source/panels/**/*.ts', { absolute: false });
+    const panelEntries = {};
+
+    panelFiles.forEach(file => {
+        // 规范化路径分隔符
+        const normalizedPath = file.replace(/\\/g, '/');
+        // 获取相对于source的路径 (不含扩展名)
+        const relativePath = normalizedPath.replace('source/', '').replace('.ts', '');
+        // 添加到入口点集合
+        panelEntries[relativePath] = normalizedPath;
+    });
+
+    console.log('找到面板:', Object.keys(panelEntries));
+
+    // 合并所有入口点
+    return { ...baseEntries, ...panelEntries };
 }
 
 const __filename = fileURLToPath(import.meta.url);
@@ -78,6 +117,7 @@ const outputDir = `dist/${appName}`;
 // 显示构建信息
 console.log(`构建模式: ${env.buildMode}`);
 console.log(`应用名称: ${appName}`);
+console.log(`版本: ${pkgJson.version}`);
 console.log(`输出目录: ${outputDir}`);
 if (env.autoDeploy) {
     console.log(`部署路径: ${env.extensionPath}/${appName}`);
@@ -86,17 +126,19 @@ if (env.autoDeploy) {
 }
 
 export default {
-    input: {
-        main: 'source/main.ts',
-    },
+    input: getEntryPoints(),
     output: {
         dir: outputDir,
         format: 'commonjs',
         sourcemap: false,
         entryFileNames: '[name].js',
+        manualChunks: {
+            'utils/config': ['source/utils/config.ts'],
+            'utils/logger': ['source/utils/logger.ts']
+        }
     },
     plugins: [
-        replaceVariables(appName),
+        replaceVariables(appName, pkgJson.version),
         typescript({
             tsconfig: './tsconfig.json',
             outDir: outputDir,

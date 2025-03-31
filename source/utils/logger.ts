@@ -3,15 +3,7 @@
  * 封装日志输出，便于统一管理和格式化
  */
 
-let packageName = '';
-
-/**
- * 设置包名，用于日志前缀
- * @param name 包名
- */
-export function setPackageName(name: string): void {
-    packageName = name;
-}
+import { packageName } from './config';
 
 /**
  * 获取日志前缀
@@ -89,8 +81,8 @@ export function error(message: string, ...optionalParams: any[]): void {
     }
 }
 
-export default {
-    setPackageName,
+// 导出logger对象的命名版本，这样既能保持兼容也能统一风格
+export const logger = {
     setLogLevel,
     debug,
     info,

@@ -5,10 +5,34 @@
     "editor": "",
     "description": "",
     "main": "./main.js",
-    "panels": {},
+    "panels": {
+        "default": {
+            "title": "ccp-rollup-template Default Panel",
+            "type": "dockable",
+            "main": "panels/default",
+            "size": {
+                "min-width": 400,
+                "min-height": 300,
+                "width": 1024,
+                "height": 600
+            }
+        }
+    },
     "contributions": {
-        "menu": [],
-        "messages": {},
+        "menu": [
+            {
+                "path": "i18n:menu.extension/ccp-rollup-template",
+                "label": "i18n:ccp-rollup-template.open_panel",
+                "message": "open-panel"
+            }
+        ],
+        "messages": {
+            "open-panel": {
+                "methods": [
+                    "openPanel"
+                ]
+            }
+        },
         "shortcuts": []
     }
 }

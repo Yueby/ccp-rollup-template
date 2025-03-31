@@ -1,6 +1,5 @@
 {
   "name": "ccp-rollup-template",
-  "title": "ccp-rollup-template",
   "version": "1.1.0",
   "description": "i18n:ccp-rollup-template.description",
   "main": "dist/ccp-rollup-template/main.js",
@@ -38,7 +37,7 @@
   "author": "",
   "editor": ">=3.3.0",
   "scripts": {
-    "init-extension": "node ./scripts/init-project.js",
+    "init-project": "node ./scripts/init-project.js",
     "preinstall": "node ./scripts/preinstall.js",
     "clear": "rm -rf dist",
     "watch": "pnpm clear && rollup -c -w",
