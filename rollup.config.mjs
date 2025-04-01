@@ -134,7 +134,10 @@ export default {
         entryFileNames: '[name].js',
         manualChunks: {
             'utils/config': ['source/utils/config.ts'],
-            'utils/logger': ['source/utils/logger.ts']
+            'utils/logger': ['source/utils/logger.ts'],
+            'utils/file': ['source/utils/file.ts'],
+            'utils/profile': ['source/utils/profile.ts'],
+            'utils/util': ['source/utils/util.ts'],
         }
     },
     plugins: [
@@ -184,6 +187,7 @@ export default {
                 { src: 'i18n/**/*', dest: `${outputDir}/i18n` },
                 { src: 'assets/README.md', dest: outputDir, rename: 'README.md' },
                 { src: 'assets/README_CN.md', dest: outputDir, rename: 'README_CN.md' },
+                { src: 'assets/template/PhysicsGroup.template.txt', dest: `${outputDir}/template`, rename: 'PhysicsGroup.template.txt' },
             ],
             verbose: true,
         }),
