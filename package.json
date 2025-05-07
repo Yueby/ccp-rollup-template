@@ -43,9 +43,6 @@
     "watch": "pnpm clear && rollup -c -w",
     "build": "pnpm clear && rollup -c",
     "package": "node ./scripts/package.js",
-    "lint": "eslint . --ext .ts",
-    "lint:fix": "eslint . --ext .ts --fix",
-    "format": "prettier --write \"source/**/*.{ts,tsx,js,jsx,json}\"",
     "dev": "pnpm watch"
   },
   "files": [

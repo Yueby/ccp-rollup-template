@@ -75,10 +75,7 @@
 - `pnpm watch` - 监视文件变化并自动重新构建
 - `pnpm dev` - 等同于 watch 命令，监视文件变化
 - `pnpm package` - 打包扩展以便分发
-- `pnpm init-extension` - 初始化扩展项目配置
-- `pnpm lint` - 检查代码质量
-- `pnpm lint:fix` - 自动修复代码问题
-- `pnpm format` - 格式化代码
+- `pnpm init-project` - 初始化扩展项目配置
 
 ## 环境变量说明
 
